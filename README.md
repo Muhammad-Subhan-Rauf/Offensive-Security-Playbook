@@ -55,7 +55,7 @@ This repository includes the following key scripts:
     *   It changes the file permissions to make the binary executable (`setExecutable(true)`).
     *   It uses `Runtime.getRuntime().exec()` to execute the binary, triggering the reverse shell.
 
-#### `beef_injector.py` (Optional Task)
+#### `beef_injector.py`
 *   **Purpose:** To hook browsers using the BeEF framework.
 *   **Functionality:**
     *   A `mitmproxy` addon script.
